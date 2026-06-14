@@ -4,11 +4,6 @@ on:
   push:
     branches: [main]
 
-env:
-  AWS_REGION: ap-south-1
-  ECR_REGISTRY: ${{ secrets.ECR_REGISTRY }}
-  IMAGE_TAG: latest
-
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
@@ -16,25 +11,24 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     
-    - name: Configure AWS credentials
-      uses: aws-actions/configure-aws-credentials@v2
-      with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: ${{ env.AWS_REGION }}
-    
     - name: Login to Amazon ECR
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_DEFAULT_REGION: ap-south-1
       run: |
-        aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.ECR_REGISTRY }}
+        aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
     
-    - name: Build Docker image (Data MCP)
+    - name: Build Docker image
       run: |
-        docker build -t ${{ env.ECR_REGISTRY }}/fmcg-data-mcp:${{ env.IMAGE_TAG }} mcp-servers/data/
+        docker build -t ${{ secrets.ECR_REGISTRY }}/fmcg-data-mcp:latest mcp-servers/data/
     
     - name: Push to ECR
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_DEFAULT_REGION: ap-south-1
       run: |
-        docker push ${{ env.ECR_REGISTRY }}/fmcg-data-mcp:${{ env.IMAGE_TAG }}
-    
-    - name: Print image URI
-      run: |
-        echo "Image pushed: ${{ env.ECR_REGISTRY }}/fmcg-data-mcp:${{ env.IMAGE_TAG }}"
+        aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin ${{ secrets.ECR_REGISTRY }}
+        docker push ${{ secrets.ECR_REGISTRY }}/fmcg-data-mcp:latest
+        echo "Image pushed successfully"
