@@ -41,7 +41,7 @@ def forecast_ets(sku_id, horizon=30):
 
 if __name__ == "__main__":
     # Test
-    result = forecast_ets("SKU_001", horizon=30)
+    result = forecast_ets("SKU_001", horizon=7)
     print(f"✅ 7-day forecast for SKU_001:")
     for date, value in zip(result['dates'], result['forecast']):
         print(f"  {date.strftime('%Y-%m-%d')}: {value:.0f} units")
