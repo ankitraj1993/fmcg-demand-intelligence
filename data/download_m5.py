@@ -3,6 +3,11 @@ import pandas as pd
 import requests
 import zipfile
 from pathlib import Path
+import boto3
+import pandas as pd
+
+s3_client = boto3.client('s3', region_name='ap-south-1')
+bucket_name = 'fmcg-demand-intel-ankit'
 
 def download_m5():
     """Download M5 Walmart dataset from Kaggle"""
@@ -42,8 +47,18 @@ def generate_synthetic_fmcg(num_skus=50, num_days=730):
             })
     
     df = pd.DataFrame(data)
-    df.to_csv('data/fmcg_sales.csv', index=False)
-    print(f"Generated {len(df)} records for {num_skus} SKUs")
+
+    # Save to S3 instead of local
+    csv_buffer = df.to_csv(index=False)
+    s3_client.put_object(
+        Bucket=bucket_name,
+        Key='data/fmcg_sales.csv',
+        Body=csv_buffer
+    )
+    print(f"✅ Data saved to S3: s3://{bucket_name}/data/fmcg_sales.csv")
+
+    # df.to_csv('data/fmcg_sales.csv', index=False)
+    # print(f"Generated {len(df)} records for {num_skus} SKUs")
     return df
 
 if __name__ == "__main__":
