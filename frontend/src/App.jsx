@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import './App.css';
 import Auth from './pages/Auth';
 import Dashboard from './pages/Dashboard';
+import './styles/App.css';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -10,6 +10,7 @@ function App() {
   useEffect(() => {
     const token = localStorage.getItem('token');
     const userData = localStorage.getItem('user');
+    
     if (token && userData) {
       setUser(JSON.parse(userData));
     }
@@ -25,11 +26,11 @@ function App() {
   if (loading) return <div className="loading">Loading...</div>;
 
   return (
-    <div className="App">
-      {!user ? (
-        <Auth setUser={setUser} />
-      ) : (
+    <div className="app">
+      {user ? (
         <Dashboard user={user} onLogout={handleLogout} />
+      ) : (
+        <Auth setUser={setUser} />
       )}
     </div>
   );
